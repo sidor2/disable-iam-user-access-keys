@@ -37,7 +37,7 @@ npm install
 cdk deploy
 ```
 
-7. You can test the revocation of an IAM user's access keys by running the following AWS CLI command:
+4. You can test the revocation of an IAM user's access keys by running the following AWS CLI command:
 ```bash
 aws iam update-access-key --access-key-id <Access key ID> --status Inactive --user-name <IAM user name>
 ```
