@@ -9,10 +9,6 @@ export class AccessKeysRotationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // const existingRule = config.ManagedRule.fromConfigRuleName(this, 'ExistingRule', 'access-keys-rotated');
-
-    
-
     const managedRule = new config.ManagedRule(this, 'AccessKeysRotated', {
       identifier: config.ManagedRuleIdentifiers.ACCESS_KEYS_ROTATED,
       inputParameters: {
@@ -42,7 +38,6 @@ export class AccessKeysRotationStack extends cdk.Stack {
     // Add the policy to the SSM automation role
     ssmAutomationRole.addToPolicy(ssmAutomationPolicy);
 
-
     const parameters = {
       'AutomationAssumeRole': {
         "StaticValue": {
@@ -65,20 +60,10 @@ export class AccessKeysRotationStack extends cdk.Stack {
       configRuleName: managedRule.configRuleName,
       targetId: 'AWSConfigRemediation-RevokeUnusedIAMUserCredentials',
       targetType: 'SSM_DOCUMENT',
-    
-      // the properties below are optional
       automatic: true,
-      // executionControls: {
-      //   ssmControls: {
-      //     concurrentExecutionRatePercentage: 123,
-      //     errorPercentage: 123,
-      //   },
-      // },
       maximumAutomaticAttempts: 2,
       parameters: parameters,
-      // resourceType: 'resourceType',
       retryAttemptSeconds: 300,
-      // targetVersion: 'targetVersion',
     });
 
   }
