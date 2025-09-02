@@ -1,55 +1,77 @@
 # AWS CDK AccessKeysRotationStack
 
-This AWS CDK stack sets up a Config Rule to enforce the rotation of IAM access keys for IAM users within your AWS account. It also configures an AWS Systems Manager (SSM) Automation document to revoke IAM user credentials that have not been used for a specified period.
+A serverless AWS CDK stack that enforces IAM access key rotation using an AWS Config Rule and automates credential revocation via AWS Systems Manager (SSM) Automation.
+
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org)
+[![AWS CDK](https://img.shields.io/badge/AWS_CDK-v2-orange)](https://aws.amazon.com/cdk/)
+[![Last Updated](https://img.shields.io/badge/Last%20Updated-Sep%2002,%202025-lightgrey)](https://github.com/username/repo)
+
+## Overview
+
+This AWS CDK stack sets up an AWS Config Rule to monitor and enforce the rotation of IAM access keys, ensuring they are rotated within a specified timeframe (default: 60 days). It also configures an SSM Automation document to revoke unused IAM user credentials, triggered by Config Rule violations. The solution enhances security by automating key management and revocation processes.
+
+<img src="./diagram.png" alt="CDK App Architecture Diagram" width="25%">
+
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Architecture](#architecture)
+- [Deployment](#deployment)
+- [Cleanup](#cleanup)
+- [Additional Resources](#additional-resources)
+
+
+## Features
+- **Access Key Rotation**: Enforces rotation of IAM access keys using an AWS Config managed rule.
+- **Automated Revocation**: Uses SSM Automation to revoke unused credentials based on Config Rule violations.
+- **Customizable Rules**: Allows modification of the rotation interval (e.g., `maxAccessKeyAge`) and SSM permissions.
+- **CDK-Based**: Infrastructure defined and deployed using AWS Cloud Development Kit (CDK).
+- **Security Focused**: Improves account security by monitoring and managing IAM credentials.
 
 ## Prerequisites
+- **AWS CLI**: Installed and configured with appropriate credentials.
+- **Node.js**: Required for AWS CDK (version 14 or higher recommended).
+- **AWS Account**: With permissions to create Config Rules, SSM Automation documents, and IAM roles.
 
-Before deploying this stack, you need the following prerequisites:
-
-1. AWS CLI installed and configured with appropriate credentials.
-2. Node.js installed, as the AWS CDK is built on Node.js.
-
-## Description
-<!-- add the diagram image here and make it smaller-->
-<img src="./diagram.png" alt="CDK App Architecture Diagram" width="25%" height="25%">
+## Architecture
 
 ### Config Rule
-The stack creates an AWS Config managed rule to check whether IAM access keys have been rotated within a certain timeframe. By default, the rule checks if access keys have been rotated within the last 60 days. You can modify the maxAccessKeyAge value in the AccessKeysRotationStack constructor to set a different rotation interval.
+- Creates an AWS Config managed rule to check if IAM access keys have been rotated within a specified timeframe.
+- Default rotation period is 60 days; modify `maxAccessKeyAge` in the `AccessKeysRotationStack` constructor to adjust this interval.
 
 ### SSM Automation
-To automate the process of revoking IAM user credentials that have not been used for a specified period, the stack sets up an SSM Automation document. This document will be triggered by the AWS Config Rule violation, and it will revoke the unused IAM user credentials. The SSM Automation requires permissions to perform IAM actions and list discovered resources in AWS Config.
+- Sets up an SSM Automation document to revoke IAM user credentials unused for a specified period.
+- Triggered by AWS Config Rule violations.
+- **IAM Role**: Creates `SsmAutomationRole` for the `ssm.amazonaws.com` service principal, with an inline policy granting IAM actions and `config:ListDiscoveredResources` permissions. Customize `ssmAutomationPolicy` in the constructor for specific permissions.
+- **Remediation Configuration**: Defined by `MyCfnRemediationConfiguration`, linking the Config Rule (`managedRule.configRuleName`) and SSM document as the target type. The `parameters` object includes IAM user ARN and maximum credential age.
 
-The stack creates an IAM role named SsmAutomationRole, which allows the ssm.amazonaws.com service principal to assume it. An inline policy is attached to this role to grant permissions for IAM actions and config:ListDiscoveredResources. If you need to apply more specific permissions, you can modify the ssmAutomationPolicy in the AccessKeysRotationStack constructor.
-
-The SSM Automation configuration is defined by the CfnRemediationConfiguration resource, named MyCfnRemediationConfiguration. It specifies the AWS Config Rule (managedRule.configRuleName) that triggers the remediation and the target type (SSM_DOCUMENT). The parameters object provides the necessary parameters for the Automation execution, including the IAM user ARN and the maximum age of credentials.
-
-## Deployment Steps
-Follow these steps to deploy the stack:
-
-1. Clone the repository and navigate to the project directory.
-2. Install dependencies: 
-```bash
-npm install
-```
-
+## Deployment
+1. Clone the repository and navigate to the project directory:
+   ```bash
+   git clone https://github.com/username/repo.git
+   cd aws-cdk-access-keys-rotation-stack
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 3. Deploy the stack:
-```bash
-cdk deploy
-```
+   ```bash
+   cdk deploy
+   ```
+4. Test access key revocation (optional):
+   ```bash
+   aws iam update-access-key --access-key-id <Access key ID> --status Inactive --user-name <IAM user name>
+   ```
+   - Replace `<Access key ID>` and `<IAM user name>` with valid values.
 
-4. You can test the revocation of an IAM user's access keys by running the following AWS CLI command:
-```bash
-aws iam update-access-key --access-key-id <Access key ID> --status Inactive --user-name <IAM user name>
-```
-
-## Clean Up
-To remove the stack and its resources from your AWS account, use the following command: 
+## Cleanup
+To remove the stack and its resources from your AWS account:
 ```bash
 cdk destroy
 ```
 
-## Additional Information
-
-- AWS CDK documentation: https://docs.aws.amazon.com/cdk/latest/guide/home.html
-- AWS Config documentation: https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
-- AWS Systems Manager (SSM) Automation documentation: https://docs.aws.amazon.com/systems-manager/latest/userguide/automation.html
+## Additional Resources
+- [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
+- [AWS Config Documentation](https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html)
+- [AWS Systems Manager (SSM) Automation Documentation](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation.html)
