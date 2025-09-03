@@ -2,7 +2,7 @@
 
 A serverless AWS CDK stack that enforces IAM access key rotation using an AWS Config Rule and automates credential revocation via AWS Systems Manager (SSM) Automation.
 
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.1%2B-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![AWS CDK](https://img.shields.io/badge/AWS_CDK-v2-orange)](https://aws.amazon.com/cdk/)
 [![Last Updated](https://img.shields.io/badge/Last%20Updated-Sep%2002,%202025-lightgrey)](https://github.com/username/repo)
 
